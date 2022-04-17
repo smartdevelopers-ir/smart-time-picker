@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="WheelView">
+        <attr name="activeColor" format="color"/>
+        <attr name="inactivateColor" format="color"/>
+    </declare-styleable>
+    <dimen name="wv_wheel_child_height">30dp</dimen>
+    <dimen name="whv_main_height">180dp</dimen>
+    <color name="whv_color_divider">#BDBDBD</color>
+</resources>
