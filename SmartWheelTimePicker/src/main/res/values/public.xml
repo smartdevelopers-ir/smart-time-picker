@@ -2,4 +2,5 @@
 <resources>
     <public name="activeColor" type="color" />
     <public name="inactivateColor" type="color" />
+    <public name="colorPrimary" type="color" />
 </resources>

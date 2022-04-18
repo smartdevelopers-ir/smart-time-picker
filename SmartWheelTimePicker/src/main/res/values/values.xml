@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <declare-styleable name="WheelView">
+    <declare-styleable name="TimePickerView">
         <attr name="activeColor" format="color"/>
         <attr name="inactivateColor" format="color"/>
     </declare-styleable>

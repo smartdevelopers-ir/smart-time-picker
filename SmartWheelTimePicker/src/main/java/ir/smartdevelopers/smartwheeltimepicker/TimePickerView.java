@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
 
-public class WheelView extends ConstraintLayout {
+public class TimePickerView extends ConstraintLayout {
     private View mTopCoverView,mBottomCoverView;
     private WheelEditText edtHour,edtMinute;
     private WheelRecyclerView mHourRecyclerView,mMinuteRecyclerView,mAmPmRecyclerView;
@@ -42,15 +42,15 @@ public class WheelView extends ConstraintLayout {
    private int mActiveColor;
    private WheelEditText.OnBackListener mOnBackListener;
    private OnTimeChangeListener mOnTimeChangeListener;
-    public WheelView(@NonNull Context context) {
+    public TimePickerView(@NonNull Context context) {
         this(context,null);
     }
 
-    public WheelView(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public TimePickerView(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs,0);
     }
 
-    public WheelView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public TimePickerView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context,attrs);
     }
@@ -60,16 +60,16 @@ public class WheelView extends ConstraintLayout {
         initListeners();
 
         if (attrs !=null){
-            TypedArray typedArray=context.obtainStyledAttributes(attrs,R.styleable.WheelView);
+            TypedArray typedArray=context.obtainStyledAttributes(attrs,R.styleable.TimePickerView);
             TypedValue typedValue=new TypedValue();
             context.getTheme().resolveAttribute(R.attr.colorPrimary,typedValue,true);
             int defaultActiveColor=typedValue.data;
-            mActiveColor=typedArray.getColor(R.styleable.WheelView_activeColor, defaultActiveColor);
+            mActiveColor=typedArray.getColor(R.styleable.TimePickerView_activeColor, defaultActiveColor);
             mHourRecyclerView.setCenterColor(mActiveColor);
             mMinuteRecyclerView.setCenterColor(mActiveColor);
             mAmPmRecyclerView.setCenterColor(mActiveColor);
 
-            int inactivateColor=typedArray.getColor(R.styleable.WheelView_inactivateColor, Color.BLACK);
+            int inactivateColor=typedArray.getColor(R.styleable.TimePickerView_inactivateColor, Color.BLACK);
             mHourRecyclerView.setInactivateColor(inactivateColor);
             mMinuteRecyclerView.setInactivateColor(inactivateColor);
             mAmPmRecyclerView.setInactivateColor(inactivateColor);
