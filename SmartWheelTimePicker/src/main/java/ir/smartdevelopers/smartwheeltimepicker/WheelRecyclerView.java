@@ -138,6 +138,10 @@ public class WheelRecyclerView extends RecyclerView {
 
     }
 
+    @Override
+    public void onScrollStateChanged(int state) {
+        super.onScrollStateChanged(state);
+    }
 
     public interface SnapViewChangeListener{
         void onSnapViewChanged(View lastSnapView,View newSnapView);

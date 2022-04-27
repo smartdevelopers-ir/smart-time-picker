@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -12,11 +14,13 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -42,6 +46,7 @@ public class TimePickerView extends ConstraintLayout {
    private int mActiveColor;
    private WheelEditText.OnBackListener mOnBackListener;
    private OnTimeChangeListener mOnTimeChangeListener;
+   private boolean mustScrollToDefaultPosition=true;
     public TimePickerView(@NonNull Context context) {
         this(context,null);
     }
@@ -87,7 +92,7 @@ public class TimePickerView extends ConstraintLayout {
         }
         mHourAdapter=new WheelAdapter(mHours);
         mMinuteAdapter=new WheelAdapter(mMinutes);
-        mAmPmAdapter=new AmPmAdapter();
+        mAmPmAdapter=new AmPmAdapter(context);
         mHourAdapter.setOnItemClickListener(mHourOnItemClickListener);
         mMinuteAdapter.setOnItemClickListener(mMinuteOnItemClickListener);
         mAmPmAdapter.setOnItemClickListener(mAmPmOnItemClickListener);
@@ -104,21 +109,73 @@ public class TimePickerView extends ConstraintLayout {
         mAmPmRecyclerView.setToScale(1.4f);
         mAmPmRecyclerView.setAdapter(mAmPmAdapter);
 
-        mMinuteLayoutManager.scrollToPosition(Integer.MAX_VALUE/2);
-        mHourLayoutManager.scrollToPosition(Integer.MAX_VALUE/2-6);
+        mMinuteLayoutManager.scrollToPosition(Integer.MAX_VALUE/2+20);
+        mHourLayoutManager.scrollToPosition(Integer.MAX_VALUE/2-8);
 
-        post(()->{
-            if (!Objects.equals(mMinuteRecyclerView.getTag(),"called")){
-                mMinuteRecyclerView.setTag("called");
-                scrollToNumber(mMinuteRecyclerView,mMinuteLayoutManager,"00",true,mMinutes);
 
+
+        Runnable runnable=()->{
+            if (mustScrollToDefaultPosition){
+
+                if (!Objects.equals(mMinuteRecyclerView.getTag(),"called")){
+                    mMinuteRecyclerView.setTag("called");
+                    scrollToNumber(mMinuteRecyclerView,mMinuteLayoutManager,"00",true,mMinutes);
+
+                }
+                if (!Objects.equals(mHourRecyclerView.getTag(),"called")) {
+                    mHourRecyclerView.setTag("called");
+                    scrollToNumber(mHourRecyclerView, mHourLayoutManager, "6", true, mHours);
+                }
             }
-            if (!Objects.equals(mHourRecyclerView.getTag(),"called")) {
-                mHourRecyclerView.setTag("called");
-                scrollToNumber(mHourRecyclerView, mHourLayoutManager, "6", true, mHours);
+        };
+        post(()->{
+            if (mMinuteRecyclerView.getScrollState() != RecyclerView.SCROLL_STATE_IDLE ||
+                    mHourRecyclerView.getScrollState() != RecyclerView.SCROLL_STATE_IDLE ){
+                mMinuteRecyclerView.stopScroll();
+                mHourRecyclerView.stopScroll();
+                post(runnable);
+            }else {
+                mMinuteRecyclerView.stopScroll();
+                mHourRecyclerView.stopScroll();
+                runnable.run();
             }
         });
 
+
+    }
+
+    @Nullable
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Bundle bundle=new Bundle();
+        bundle.putParcelable("superState",super.onSaveInstanceState());
+        bundle.putBoolean("mustScrollToDefaultPosition",false);
+        Time time=getTime();
+        bundle.putInt("hour",time.get24FormatHour());
+        bundle.putInt("minute",time.minute);
+
+        return bundle;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        if (state instanceof Bundle){
+            Bundle bundle= (Bundle) state;
+            int hour=bundle.getInt("hour");
+            int minute=bundle.getInt("minute");
+            mustScrollToDefaultPosition=bundle.getBoolean("mustScrollToDefaultPosition");
+            state=bundle.getParcelable("superState");
+            setTime(hour,minute,false);
+        }
+        super.onRestoreInstanceState(state);
+    }
+
+    public void reset(boolean smoothScroll){
+        mMinuteRecyclerView.stopScroll();
+        mHourRecyclerView.stopScroll();
+        scrollToNumber(mMinuteRecyclerView,mMinuteLayoutManager,"00",smoothScroll,mMinutes);
+        scrollToNumber(mHourRecyclerView, mHourLayoutManager, "6", smoothScroll, mHours);
+        goToAm();
     }
     private void findViews() {
         mMinuteRecyclerView=findViewById(R.id.whv_minuteRecyclerView);
@@ -300,6 +357,39 @@ public class TimePickerView extends ConstraintLayout {
         }
         return time;
     }
+    /**24 hour format*/
+    public void setTime(@IntRange(from = 0,to = 24) int hour,@IntRange(from = 0,to = 59)int minute,boolean smoothScroll){
+        int hour24;
+        boolean am;
+        if (hour==0 || hour==24){
+            am=true;
+            hour24=12;
+        }else if (hour <12){
+            am =true;
+            hour24=hour;
+        }else if (hour == 12){
+            am=false;
+            hour24=hour;
+        }else {
+            am=false;
+            hour24 = hour - 12;
+        }
+        setTime(hour24,minute,am,smoothScroll);
+    }
+    /**12 hour format*/
+    public void setTime(@IntRange(from = 1,to = 12) int hour,@IntRange(from = 0,to = 59) int minute, boolean am,boolean smoothScroll){
+        mustScrollToDefaultPosition=false;
+        String hourSt=String.valueOf(hour);
+        String minuteSt=String.format(new Locale("en"),"%02d",minute);
+        scrollToNumber(mHourRecyclerView,mHourLayoutManager,hourSt,smoothScroll,mHours);
+        scrollToNumber(mMinuteRecyclerView,mMinuteLayoutManager,minuteSt,smoothScroll,mMinutes);
+        if (am){
+            goToAm();
+        }else {
+            goToPm();
+        }
+    }
+
     /** Save changed numbers by edittext and hide covers and scroll to that numbers*/
     private void saveChanges() {
         hideKeyboard(edtMinute);
@@ -393,7 +483,8 @@ public class TimePickerView extends ConstraintLayout {
         }
 //        Log.v("TTT","center view text ="+centerTextView.getText().toString());
         try {
-            int centerIndex=centerPos % numbers.size();
+            String textViewNumber=centerTextView.getText().toString();
+            int centerIndex=numbers.indexOf(textViewNumber);
             int targetIndex=numbers.indexOf(targetNumberText);
             if (targetIndex == -1){
                 return;
@@ -402,6 +493,7 @@ public class TimePickerView extends ConstraintLayout {
             int shift=targetIndex - centerIndex;
             if (smoothScroll){
                 int targetPos = centerPos + (targetIndex - centerIndex);
+
                 scrollToPos(recyclerView,layoutManager,centerView,targetPos);
             }else {
                 if (recyclerView.getAdapter() instanceof WheelAdapter){

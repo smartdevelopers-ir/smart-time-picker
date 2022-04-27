@@ -1,5 +1,6 @@
 package ir.smartdevelopers.smartwheeltimepicker;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,10 +10,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class AmPmAdapter extends RecyclerView.Adapter<AmPmAdapter.PagerViewHolder> {
-    private final String[] mTexts={"","ق.ظ","ب.ظ",""};
+    private final String[] mTexts;
     private OnItemClickListener mOnItemClickListener;
-    public AmPmAdapter() {
-
+    public AmPmAdapter(Context context) {
+        mTexts=new String[]{"",context.getString(R.string.whv_am),context.getString(R.string.whv_pm),""};
     }
 
     @NonNull
