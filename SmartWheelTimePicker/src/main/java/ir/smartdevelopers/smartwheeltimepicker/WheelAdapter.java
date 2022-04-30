@@ -72,7 +72,7 @@ public class WheelAdapter extends RecyclerView.Adapter<WheelAdapter.PagerViewHol
         if (shift==0){
             return;
         }
-        mShift=shift;
+        mShift=mShift+shift;
         notifyItemRangeChanged(startPos,16,"shifted");
     }
 }
