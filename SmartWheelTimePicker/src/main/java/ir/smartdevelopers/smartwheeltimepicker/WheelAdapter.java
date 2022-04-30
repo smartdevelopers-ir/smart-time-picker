@@ -69,6 +69,9 @@ public class WheelAdapter extends RecyclerView.Adapter<WheelAdapter.PagerViewHol
     }
 
     public void updateList(int startPos,int shift){
+        if (shift==0){
+            return;
+        }
         mShift=shift;
         notifyItemRangeChanged(startPos,16,"shifted");
     }

@@ -47,6 +47,7 @@ public class TimePickerView extends ConstraintLayout {
    private WheelEditText.OnBackListener mOnBackListener;
    private OnTimeChangeListener mOnTimeChangeListener;
    private boolean mustScrollToDefaultPosition=true;
+   private boolean mFirstSmoothScroll=true;
     public TimePickerView(@NonNull Context context) {
         this(context,null);
     }
@@ -119,12 +120,12 @@ public class TimePickerView extends ConstraintLayout {
 
                 if (!Objects.equals(mMinuteRecyclerView.getTag(),"called")){
                     mMinuteRecyclerView.setTag("called");
-                    scrollToNumber(mMinuteRecyclerView,mMinuteLayoutManager,"00",true,mMinutes);
+                    scrollToNumber(mMinuteRecyclerView,mMinuteLayoutManager,"00",mFirstSmoothScroll,mMinutes);
 
                 }
                 if (!Objects.equals(mHourRecyclerView.getTag(),"called")) {
                     mHourRecyclerView.setTag("called");
-                    scrollToNumber(mHourRecyclerView, mHourLayoutManager, "6", true, mHours);
+                    scrollToNumber(mHourRecyclerView, mHourLayoutManager, "6", mFirstSmoothScroll, mHours);
                 }
             }
         };
@@ -337,8 +338,8 @@ public class TimePickerView extends ConstraintLayout {
 
     }
 
-    public void preventFirstScroll(){
-        mustScrollToDefaultPosition=false;
+    public void preventFirstSmoothScroll(){
+        mFirstSmoothScroll=false;
     }
     public Time getTime(){
         View minuteCenterView=mMinuteRecyclerView.getCenterView();
