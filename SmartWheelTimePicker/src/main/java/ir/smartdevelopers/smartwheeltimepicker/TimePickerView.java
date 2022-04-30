@@ -129,15 +129,17 @@ public class TimePickerView extends ConstraintLayout {
             }
         };
         post(()->{
-            if (mMinuteRecyclerView.getScrollState() != RecyclerView.SCROLL_STATE_IDLE ||
-                    mHourRecyclerView.getScrollState() != RecyclerView.SCROLL_STATE_IDLE ){
-                mMinuteRecyclerView.stopScroll();
-                mHourRecyclerView.stopScroll();
-                post(runnable);
-            }else {
-                mMinuteRecyclerView.stopScroll();
-                mHourRecyclerView.stopScroll();
-                runnable.run();
+            if (mustScrollToDefaultPosition){
+                if (mMinuteRecyclerView.getScrollState() != RecyclerView.SCROLL_STATE_IDLE ||
+                        mHourRecyclerView.getScrollState() != RecyclerView.SCROLL_STATE_IDLE ){
+                    mMinuteRecyclerView.stopScroll();
+                    mHourRecyclerView.stopScroll();
+                    post(runnable);
+                }else {
+                    mMinuteRecyclerView.stopScroll();
+                    mHourRecyclerView.stopScroll();
+                    runnable.run();
+                }
             }
         });
 
@@ -335,6 +337,9 @@ public class TimePickerView extends ConstraintLayout {
 
     }
 
+    public void preventFirstScroll(){
+        mustScrollToDefaultPosition=false;
+    }
     public Time getTime(){
         View minuteCenterView=mMinuteRecyclerView.getCenterView();
         View hourCenterView=mHourRecyclerView.getCenterView();
