@@ -3,6 +3,7 @@ package ir.smartdevelopers.smartwheeltimepicker;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -44,10 +45,11 @@ public class WheelRecyclerView extends RecyclerView {
     }
 
     View getCenterView(){
+        mSnapView= mSnapHelper.findSnapView(getLayoutManager());
         return mSnapView;
     }
     int getSnapViewPosition(){
-        if (mSnapView !=null && getLayoutManager() != null){
+        if (getCenterView() !=null && getLayoutManager() != null){
             return getLayoutManager().getPosition(mSnapView);
         }
         return -1;
@@ -79,6 +81,20 @@ public class WheelRecyclerView extends RecyclerView {
     public void setSnapViewChangeListener(SnapViewChangeListener snapViewChangeListener) {
         mSnapViewChangeListener = snapViewChangeListener;
     }
+
+    public int getCenterViewPos(){
+        if (!(getLayoutManager() instanceof LinearLayoutManager)){
+            return 0;
+        }
+        View centerView=getCenterView();
+        if (centerView == null) {
+            return 0;
+        }
+        LinearLayoutManager layoutManager= (LinearLayoutManager) getLayoutManager();
+        int pos=layoutManager.getPosition(centerView);
+        return Math.max(0,pos);
+    }
+
 
     @Override
     public void onScrolled(int dx, int dy) {

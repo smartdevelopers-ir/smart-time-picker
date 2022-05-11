@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class WheelLayoutManager extends LinearLayoutManager {
+    private OnLayoutCompleteListener mOnLayoutCompleteListener;
     public WheelLayoutManager(Context context) {
         super(context);
     }
@@ -35,7 +36,20 @@ public class WheelLayoutManager extends LinearLayoutManager {
         FastScroller scroller=new FastScroller(recyclerView.getContext());
         scroller.setTargetPosition(pos);
         startSmoothScroll(scroller);
+
     }
+
+    @Override
+    public void onLayoutCompleted(RecyclerView.State state) {
+        if (mOnLayoutCompleteListener != null) {
+            mOnLayoutCompleteListener.onLayoutCompleted();
+        }
+    }
+
+    public void setOnLayoutCompleteListener(OnLayoutCompleteListener onLayoutCompleteListener) {
+        mOnLayoutCompleteListener = onLayoutCompleteListener;
+    }
+
     static class FastScroller extends LinearSmoothScroller {
         public FastScroller(Context context) {
             super(context);
@@ -77,5 +91,8 @@ public class WheelLayoutManager extends LinearLayoutManager {
         protected int calculateTimeForDeceleration(int dx) {
             return super.calculateTimeForDeceleration(dx);
         }
+    }
+    public interface OnLayoutCompleteListener{
+        void onLayoutCompleted();
     }
 }
